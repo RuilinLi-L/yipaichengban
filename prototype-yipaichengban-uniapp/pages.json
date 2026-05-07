@@ -3,14 +3,22 @@
     {
       "path": "pages/index/index",
       "style": {
+        "navigationBarTitleText": "智存",
         "navigationStyle": "custom",
-        "backgroundColor": "#f7f4ed"
+        "backgroundColor": "#f7f4ed",
+        "enablePullDownRefresh": false,
+        "app-plus": {
+          "titleNView": false,
+          "bounce": "none",
+          "scrollIndicator": "none"
+        }
       }
     }
   ],
   "globalStyle": {
     "backgroundColor": "#f7f4ed",
     "backgroundTextStyle": "light",
-    "navigationBarTextStyle": "black"
+    "navigationBarTextStyle": "black",
+    "navigationBarBackgroundColor": "#f7f4ed"
   }
 }

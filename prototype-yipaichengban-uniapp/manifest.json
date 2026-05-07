@@ -3,5 +3,38 @@
   "appid": "__UNI__ZHICUN001",
   "description": "碎片信息 AI 全能管家",
   "versionName": "0.1.0",
-  "versionCode": "1"
+  "versionCode": "1",
+  "vueVersion": "3",
+  "transformPx": false,
+  "app-plus": {
+    "screenOrientation": [
+      "portrait-primary"
+    ],
+    "splashscreen": {
+      "alwaysShowBeforeRender": false,
+      "waiting": false,
+      "autoclose": true
+    },
+    "modules": {},
+    "distribute": {
+      "android": {
+        "packagename": "com.yipaichengban.zhicun",
+        "abiFilters": [
+          "arm64-v8a",
+          "armeabi-v7a"
+        ],
+        "permissions": [
+          "<uses-permission android:name=\"android.permission.INTERNET\"/>",
+          "<uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\"/>",
+          "<uses-permission android:name=\"android.permission.SYSTEM_ALERT_WINDOW\"/>",
+          "<uses-permission android:name=\"android.permission.FOREGROUND_SERVICE\"/>",
+          "<uses-permission android:name=\"android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION\"/>",
+          "<uses-permission android:name=\"android.permission.POST_NOTIFICATIONS\"/>",
+          "<uses-permission android:name=\"android.permission.READ_EXTERNAL_STORAGE\"/>",
+          "<uses-permission android:name=\"android.permission.READ_MEDIA_IMAGES\"/>"
+        ],
+        "custompermissions": true
+      }
+    }
+  }
 }

@@ -27,6 +27,22 @@ const folderAssets = computed(() => assets.value.filter((item) => item.folderId 
 
 const searchResults = computed(() => searchAssets(assets.value, query.value));
 
+const selectedFolderName = computed(() => {
+  const folder = folders.find((item) => item.id === selectedFolder.value);
+  return folder ? folder.name : '智能文件夹';
+});
+
+const selectedAssetFolderName = computed(() => {
+  if (!selectedAsset.value) return '知识资产';
+  const folder = folders.find((item) => item.id === selectedAsset.value.folderId);
+  return folder ? folder.name : '知识资产';
+});
+
+const hasActionModule = computed(() => {
+  const asset = selectedAsset.value;
+  return Boolean(asset && ((asset.tasks && asset.tasks.length) || (asset.materials && asset.materials.length) || (asset.reminders && asset.reminders.length)));
+});
+
 function folderCount(folderId) {
   return assets.value.filter((item) => item.folderId === folderId).length;
 }
@@ -74,7 +90,8 @@ function onPickImage() {
   uni.chooseImage({
     count: 1,
     success(res) {
-      const fileName = res.tempFilePaths?.[0]?.split('/').pop() || '本地截图';
+      const filePath = Array.isArray(res.tempFilePaths) ? res.tempFilePaths[0] : '';
+      const fileName = filePath ? filePath.split('/').pop() : '本地截图';
       const asset = buildAsset({
         type: 'image',
         variant: 'normal',
@@ -95,6 +112,9 @@ function onPickImage() {
       view.value = 'detail';
       showToast('截图已保存到私有沙盒');
     },
+    fail() {
+      showToast('未选择截图');
+    },
   });
 }
 
@@ -111,6 +131,8 @@ function backFromDetail() {
     view.value = 'folder';
   } else if (detailOrigin.value === 'capture') {
     view.value = 'capture';
+  } else if (detailOrigin.value === 'home') {
+    view.value = 'home';
   } else {
     view.value = 'vault';
   }
@@ -224,7 +246,7 @@ function saveCurrentCard() {
           <view class="section-card" style="display:flex;align-items:center;justify-content:space-between;">
             <view>
               <view class="kicker">异构瀑布流</view>
-              <view style="font-size: 40rpx; font-weight: 800;">{{ folders.find((item) => item.id === selectedFolder)?.name }}</view>
+              <view style="font-size: 40rpx; font-weight: 800;">{{ selectedFolderName }}</view>
             </view>
             <button class="ghost-btn" @click="view = 'vault'">返回</button>
           </view>
@@ -294,7 +316,7 @@ function saveCurrentCard() {
         <view v-else-if="view === 'detail' && selectedAsset" class="action-row">
           <view class="section-card" style="display:flex;align-items:flex-start;justify-content:space-between;gap:18rpx;">
             <view>
-              <view class="kicker">{{ folders.find((item) => item.id === selectedAsset.folderId)?.name || '知识资产' }} / 置信度 {{ selectedAsset.confidence || 0 }}%</view>
+              <view class="kicker">{{ selectedAssetFolderName }} / 置信度 {{ selectedAsset.confidence || 0 }}%</view>
               <view style="font-size: 40rpx; font-weight: 800;">{{ selectedAsset.title }}</view>
             </view>
             <button class="ghost-btn" @click="backFromDetail">返回</button>
@@ -312,7 +334,7 @@ function saveCurrentCard() {
             </view>
           </view>
 
-          <view v-if="selectedAsset.tasks?.length || selectedAsset.materials?.length || selectedAsset.reminders?.length" class="section-card">
+          <view v-if="hasActionModule" class="section-card">
             <view class="kicker">一拍成办行动模块</view>
             <view style="line-height: 1.7; color: #4b5d56;">AI 已从该资产中识别出可执行事项，确认后可进入待办或提醒。</view>
             <view class="tech-list">
