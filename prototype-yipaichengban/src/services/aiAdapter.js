@@ -1,6 +1,41 @@
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export async function analyzeCapture(capture) {
+  try {
+    return await analyzeCaptureRemote(capture);
+  } catch (error) {
+    console.warn('[AIAdapter] OpenAI API unavailable, using local mock.', error);
+    if (capture.imageDataUrl) {
+      throw error;
+    }
+  }
+
+  return analyzeCaptureMock(capture);
+}
+
+async function analyzeCaptureRemote(capture) {
+  const response = await fetch('/api/analyze-capture', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      name: capture.name,
+      source: capture.source,
+      mockText: capture.mockText,
+      imageDataUrl: capture.imageDataUrl,
+    }),
+  });
+
+  if (!response.ok) {
+    const payload = await response.json().catch(() => ({}));
+    throw new Error(payload.error || `AI API failed with ${response.status}`);
+  }
+
+  return response.json();
+}
+
+async function analyzeCaptureMock(capture) {
   await delay(1100);
 
   const text = `${capture.name || ''} ${capture.mockText || ''}`.toLowerCase();
@@ -79,6 +114,7 @@ function buildResult(payload) {
     reminders: buildReminders(payload.datetime),
     createdAt: new Date().toISOString(),
     schemaVersion: 'action-card.v1',
+    modelProvider: 'local-mock',
   };
 }
 

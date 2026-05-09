@@ -13,12 +13,13 @@ export function saveVault(items) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
 }
 
-export function createCapture({ name, source, previewUrl, mockText }) {
+export function createCapture({ name, source, previewUrl, imageDataUrl, mockText }) {
   return {
     id: crypto.randomUUID(),
     name,
     source,
     previewUrl,
+    imageDataUrl,
     mockText,
     status: 'captured',
     createdAt: new Date().toISOString(),
@@ -26,8 +27,10 @@ export function createCapture({ name, source, previewUrl, mockText }) {
 }
 
 export function persistActionCard(capture, result) {
+  const { imageDataUrl, ...safeCapture } = capture;
+
   return {
-    ...capture,
+    ...safeCapture,
     status: 'saved',
     result,
     updatedAt: new Date().toISOString(),

@@ -10,6 +10,7 @@ const query = ref('');
 const selected = ref(vault.value[0] || null);
 const analyzing = ref(false);
 const toast = ref('');
+const aiError = ref('');
 const draft = reactive(makeEmptyDraft());
 const fileInput = ref(null);
 
@@ -70,6 +71,7 @@ async function handleFile(event) {
     name: file.name,
     source: '应用私有目录 / user-capture',
     previewUrl: URL.createObjectURL(file),
+    imageDataUrl: await readFileAsDataUrl(file),
     mockText: '',
   });
 
@@ -79,6 +81,7 @@ async function handleFile(event) {
 
 async function runAnalysis(capture) {
   analyzing.value = true;
+  aiError.value = '';
   selected.value = { ...capture, status: 'analyzing' };
   activeTab.value = 'card';
 
@@ -87,9 +90,10 @@ async function runAnalysis(capture) {
     selected.value = persistActionCard(capture, result);
     applyDraft(result);
     showToast('AI 已生成行动卡，先确认再保存');
-  } catch {
+  } catch (error) {
     selected.value = { ...capture, status: 'offline' };
-    showToast('模型暂时不可用，截图已先存入沙盒');
+    aiError.value = normalizeAiError(error);
+    showToast('AI 接口调用失败，请检查配置或网络');
   } finally {
     analyzing.value = false;
   }
@@ -156,6 +160,17 @@ function showToast(message) {
   }, 2400);
 }
 
+function normalizeAiError(error) {
+  const message = error?.message || '未知错误';
+  if (message.includes('OPENAI_API_KEY')) {
+    return 'OpenAI API Key 未配置。请在 prototype-yipaichengban/.env.local 写入 OPENAI_API_KEY 后重启 dev server。';
+  }
+  if (message.includes('fetch failed') || message.includes('Failed to fetch')) {
+    return '无法连接到模型服务。请确认 OPENAI_BASE_URL 能从本机访问，并重启 dev server。';
+  }
+  return message;
+}
+
 function makeEmptyDraft() {
   return {
     title: '',
@@ -182,6 +197,15 @@ function splitTags(value) {
     .split(/[，,]/)
     .map((item) => item.trim())
     .filter(Boolean);
+}
+
+function readFileAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ''));
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
 }
 </script>
 
@@ -244,9 +268,9 @@ function splitTags(value) {
       <section v-else-if="activeTab === 'card'" class="screen card-screen" aria-labelledby="card-title">
         <div v-if="analyzing" class="analysis-state">
           <div class="scanner" aria-hidden="true"></div>
-          <p class="eyebrow">AIAdapter / mock-v1</p>
+          <p class="eyebrow">AIAdapter / OpenAI Responses API</p>
           <h2 id="card-title">正在识别截图里的时间、地点和任务</h2>
-          <p>原型使用可替换适配层；后续可接 OCR、第三方大模型或蓝心能力。</p>
+          <p>优先调用本地代理接入大模型，网络或配置不可用时自动回退到演示识别。</p>
         </div>
 
         <div v-else-if="selected?.result" class="action-card">
@@ -309,7 +333,8 @@ function splitTags(value) {
 
         <div v-else class="empty-state">
           <h2 id="card-title">还没有待确认的行动卡</h2>
-          <p>从“捕获”导入一张截图，AI 会把它整理成可编辑的任务、日程和标签。</p>
+          <p v-if="aiError">{{ aiError }}</p>
+          <p v-else>从“捕获”导入一张截图，AI 会把它整理成可编辑的任务、日程和标签。</p>
           <button class="primary-action" type="button" @click="activeTab = 'capture'">去捕获截图</button>
         </div>
       </section>
