@@ -1,0 +1,11 @@
+{
+  "name": "yipaichengban-uniapp",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "apk:doctor": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/check-apk-env.ps1",
+    "apk:configure": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/configure-apk.ps1",
+    "apk:open": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/open-hbuilderx.ps1",
+    "apk:prepare": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/prepare-apk.ps1"
+  }
+}

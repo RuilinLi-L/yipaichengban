@@ -1,13 +1,13 @@
 <script>
 export default {
   onLaunch() {
-    console.log('智存 App Launch');
+    console.log('一拍成办 App Launch');
   },
   onShow() {
-    console.log('智存 App Show');
+    console.log('一拍成办 App Show');
   },
   onHide() {
-    console.log('智存 App Hide');
+    console.log('一拍成办 App Hide');
   },
 };
 </script>
