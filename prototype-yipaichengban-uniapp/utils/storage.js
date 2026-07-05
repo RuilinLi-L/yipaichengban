@@ -49,25 +49,14 @@ export function persistActionCard(capture, result) {
 export function loadAiConfig() {
   try {
     const cached = uni.getStorageSync(AI_CONFIG_KEY);
-    return {
-      ...DEFAULT_AI_CONFIG,
-      ...(cached && typeof cached === 'object' ? cached : {}),
-    };
+    return normalizeAiConfig(cached);
   } catch {
     return { ...DEFAULT_AI_CONFIG };
   }
 }
 
 export function saveAiConfig(config) {
-  const next = {
-    ...DEFAULT_AI_CONFIG,
-    ...config,
-    proxyUrl: String(config.proxyUrl || '').trim(),
-    apiKey: String(config.apiKey || '').trim(),
-    baseUrl: String(config.baseUrl || DEFAULT_AI_CONFIG.baseUrl).trim(),
-    model: String(config.model || DEFAULT_AI_CONFIG.model).trim(),
-    reasoningEffort: String(config.reasoningEffort || DEFAULT_AI_CONFIG.reasoningEffort).trim(),
-  };
+  const next = normalizeAiConfig(config);
 
   uni.setStorageSync(AI_CONFIG_KEY, next);
   return next;
@@ -84,4 +73,20 @@ function createId() {
   }
 
   return `capture-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function normalizeAiConfig(config = {}) {
+  const cached = config && typeof config === 'object' ? config : {};
+  const merged = {
+    ...DEFAULT_AI_CONFIG,
+    ...cached,
+  };
+
+  return {
+    proxyUrl: String(merged.proxyUrl || '').trim(),
+    apiKey: String(merged.apiKey || '').trim(),
+    baseUrl: String(merged.baseUrl || DEFAULT_AI_CONFIG.baseUrl).trim(),
+    model: String(merged.model || DEFAULT_AI_CONFIG.model).trim(),
+    reasoningEffort: String(merged.reasoningEffort || DEFAULT_AI_CONFIG.reasoningEffort).trim(),
+  };
 }

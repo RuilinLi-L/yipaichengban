@@ -6,3 +6,5 @@ output/playwright/
 .env.*
 !.env.example
 !**/.env.example
+prototype-yipaichengban-uniapp/unpackage/
+prototype-yipaichengban-uniapp/*.apk

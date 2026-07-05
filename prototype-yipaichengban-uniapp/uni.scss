@@ -398,15 +398,37 @@ button::after {
   gap: 12rpx;
 }
 
+.field-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+}
+
 .label {
   color: $inkSoft;
   font-size: 24rpx;
   font-weight: 850;
 }
 
+.field-tool {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48rpx;
+  padding: 0 18rpx;
+  border-radius: 999rpx;
+  background: $surfacePressed;
+  color: $primaryDark;
+  font-size: 22rpx;
+  font-weight: 850;
+  text-align: center;
+}
+
 .input,
 .textarea {
   width: 100%;
+  min-height: 72rpx;
   border: 1rpx solid $line;
   border-radius: 18rpx;
   background: #fbfdf7;
