@@ -3,7 +3,7 @@
     {
       "path": "pages/index/index",
       "style": {
-        "navigationBarTitleText": "一拍成办",
+        "navigationBarTitleText": "智存",
         "navigationStyle": "custom",
         "backgroundColor": "#f7f4ed",
         "enablePullDownRefresh": false,

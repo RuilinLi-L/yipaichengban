@@ -21,6 +21,7 @@ const toast = ref('');
 const aiError = ref('');
 const draft = reactive(makeEmptyDraft());
 const aiConfig = reactive(loadAiConfig());
+const focusedConfigField = ref('');
 
 const filteredVault = computed(() => {
   const keyword = query.value.trim().toLowerCase();
@@ -179,7 +180,43 @@ function resetModelSettings() {
   const defaults = getDefaultAiConfig();
   const saved = saveAiConfig(defaults);
   Object.assign(aiConfig, saved);
+  focusedConfigField.value = '';
   showToast('模型配置已重置');
+}
+
+function focusConfigField(field) {
+  focusedConfigField.value = '';
+  setTimeout(() => {
+    focusedConfigField.value = field;
+  }, 0);
+}
+
+function blurConfigField(field) {
+  if (focusedConfigField.value === field) {
+    focusedConfigField.value = '';
+  }
+}
+
+function updateAiConfigField(field, event) {
+  aiConfig[field] = String(event?.detail?.value || '');
+}
+
+function pasteProxyUrl() {
+  if (typeof uni === 'undefined' || !uni.getClipboardData) {
+    showToast('当前环境无法读取剪贴板');
+    return;
+  }
+
+  uni.getClipboardData({
+    success(res) {
+      aiConfig.proxyUrl = String(res.data || '').trim();
+      focusConfigField('proxyUrl');
+      showToast(aiConfig.proxyUrl ? '已粘贴代理服务地址' : '剪贴板为空');
+    },
+    fail() {
+      showToast('读取剪贴板失败');
+    },
+  });
 }
 
 function applyDraft(result = {}) {
@@ -290,7 +327,7 @@ function readImageAsDataUrl(filePath) {
       <view class="top-bar">
         <view>
           <text class="eyebrow">vivo 移动端原型 · {{ modelModeLabel }}</text>
-          <text class="app-title">一拍成办</text>
+          <text class="app-title">智存</text>
         </view>
         <button class="icon-button" aria-label="模型与隐私" @click="activeTab = 'privacy'">
           <text>?</text>
@@ -468,27 +505,80 @@ function readImageAsDataUrl(filePath) {
           <text class="section-title">AI 接入配置</text>
 
           <view class="action-card settings-card">
-            <view class="field">
-              <text class="label">代理服务地址</text>
-              <input v-model="aiConfig.proxyUrl" class="input" type="text" placeholder="https://your-domain.com" />
+            <view class="field" @tap="focusConfigField('proxyUrl')">
+              <view class="field-label-row">
+                <text class="label">代理服务地址</text>
+                <button class="field-tool" @tap.stop="pasteProxyUrl">粘贴</button>
+              </view>
+              <input
+                :value="aiConfig.proxyUrl"
+                :focus="focusedConfigField === 'proxyUrl'"
+                class="input"
+                type="text"
+                placeholder="https://your-domain.com"
+                confirm-type="done"
+                cursor-spacing="120"
+                @input="updateAiConfigField('proxyUrl', $event)"
+                @blur="blurConfigField('proxyUrl')"
+              />
             </view>
-            <view class="field">
+            <view class="field" @tap="focusConfigField('apiKey')">
               <text class="label">API Key</text>
-              <input v-model="aiConfig.apiKey" class="input" type="password" placeholder="sk-..." />
+              <input
+                :value="aiConfig.apiKey"
+                :focus="focusedConfigField === 'apiKey'"
+                class="input"
+                type="password"
+                placeholder="sk-..."
+                confirm-type="done"
+                cursor-spacing="120"
+                @input="updateAiConfigField('apiKey', $event)"
+                @blur="blurConfigField('apiKey')"
+              />
             </view>
             <view class="meta-grid">
-              <view class="field">
+              <view class="field" @tap="focusConfigField('baseUrl')">
                 <text class="label">Base URL</text>
-                <input v-model="aiConfig.baseUrl" class="input" type="text" />
+                <input
+                  :value="aiConfig.baseUrl"
+                  :focus="focusedConfigField === 'baseUrl'"
+                  class="input"
+                  type="text"
+                  placeholder="https://api.openai.com"
+                  confirm-type="done"
+                  cursor-spacing="120"
+                  @input="updateAiConfigField('baseUrl', $event)"
+                  @blur="blurConfigField('baseUrl')"
+                />
               </view>
-              <view class="field">
+              <view class="field" @tap="focusConfigField('model')">
                 <text class="label">模型</text>
-                <input v-model="aiConfig.model" class="input" type="text" />
+                <input
+                  :value="aiConfig.model"
+                  :focus="focusedConfigField === 'model'"
+                  class="input"
+                  type="text"
+                  placeholder="gpt-5.4"
+                  confirm-type="done"
+                  cursor-spacing="120"
+                  @input="updateAiConfigField('model', $event)"
+                  @blur="blurConfigField('model')"
+                />
               </view>
             </view>
-            <view class="field">
+            <view class="field" @tap="focusConfigField('reasoningEffort')">
               <text class="label">Reasoning Effort</text>
-              <input v-model="aiConfig.reasoningEffort" class="input" type="text" />
+              <input
+                :value="aiConfig.reasoningEffort"
+                :focus="focusedConfigField === 'reasoningEffort'"
+                class="input"
+                type="text"
+                placeholder="medium"
+                confirm-type="done"
+                cursor-spacing="120"
+                @input="updateAiConfigField('reasoningEffort', $event)"
+                @blur="blurConfigField('reasoningEffort')"
+              />
             </view>
             <view class="card-actions">
               <button class="primary-action" @click="saveModelSettings">保存配置</button>
